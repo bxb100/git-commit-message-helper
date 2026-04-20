@@ -73,15 +73,26 @@ class AnthropicLlmProviderClient extends AbstractHttpLlmProviderClient {
             String line;
             String currentEvent = "";
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith("event:")) {
-                    currentEvent = line.substring(6).trim();
+                String normalizedLine = normalizeEventStreamLine(line);
+                if (normalizedLine.isEmpty()) {
                     continue;
                 }
-                if (!line.startsWith("data:")) {
+                if (normalizedLine.startsWith("event:")) {
+                    currentEvent = normalizedLine.substring(6).trim();
                     continue;
                 }
-                String payload = line.substring(5).trim();
-                if (payload.isEmpty()) {
+                if (!normalizedLine.startsWith("data:")) {
+                    continue;
+                }
+                String payload = normalizedLine.substring(5).trim();
+                if (payload.startsWith("event:")) {
+                    currentEvent = payload.substring(6).trim();
+                    continue;
+                }
+                if (payload.startsWith("data:")) {
+                    payload = payload.substring(5).trim();
+                }
+                if (payload.isEmpty() || "[DONE]".equals(payload)) {
                     continue;
                 }
                 String delta = extractStreamDelta(currentEvent, payload);
@@ -131,7 +142,7 @@ class AnthropicLlmProviderClient extends AbstractHttpLlmProviderClient {
         StringBuilder builder = new StringBuilder();
         String currentEvent = "";
         for (String rawLine : responseBody.split("\\R")) {
-            String line = rawLine.trim();
+            String line = normalizeEventStreamLine(rawLine);
             if (line.isEmpty()) {
                 continue;
             }
@@ -143,6 +154,13 @@ class AnthropicLlmProviderClient extends AbstractHttpLlmProviderClient {
                 continue;
             }
             String payload = line.substring(5).trim();
+            if (payload.startsWith("event:")) {
+                currentEvent = payload.substring(6).trim();
+                continue;
+            }
+            if (payload.startsWith("data:")) {
+                payload = payload.substring(5).trim();
+            }
             if (payload.isEmpty() || "[DONE]".equals(payload)) {
                 continue;
             }
@@ -211,5 +229,14 @@ class AnthropicLlmProviderClient extends AbstractHttpLlmProviderClient {
     static boolean isEventStream(String contentType, @NotNull String responseBody) {
         return contentType != null && contentType.contains("text/event-stream")
                 || responseBody.startsWith("data:");
+    }
+
+    @NotNull
+    static String normalizeEventStreamLine(@NotNull String line) {
+        String normalized = line.trim();
+        while (normalized.startsWith("data:event:")) {
+            normalized = normalized.substring(5).trim();
+        }
+        return normalized;
     }
 }

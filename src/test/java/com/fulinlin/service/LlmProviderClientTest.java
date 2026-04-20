@@ -56,11 +56,16 @@ public class LlmProviderClientTest {
     public void anthropicResponseParsingExtractsTextAndError() {
         String response = "{\"content\":[{\"type\":\"text\",\"text\":\"hello\"},{\"type\":\"text\",\"text\":\" world\"}]}";
         String sseResponse = "data:{\"content\":[{\"type\":\"text\",\"text\":\"hello world\"}]}\n\n";
+        String wrappedSseResponse = "data:event: content_block_delta\n"
+                + "data:data: {\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\"hello\"}}\n\n"
+                + "data:event: content_block_delta\n"
+                + "data:data: {\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\" world\"}}\n\n";
         String error = "{\"error\":{\"type\":\"invalid_request_error\",\"message\":\"bad api key\"}}";
         AnthropicLlmProviderClient client = new AnthropicLlmProviderClient();
 
         assertEquals("hello world", AnthropicLlmProviderClient.extractChatResponse(response));
         assertEquals("hello world", AnthropicLlmProviderClient.extractChatResponseFromEventStream(sseResponse));
+        assertEquals("hello world", AnthropicLlmProviderClient.extractChatResponseFromEventStream(wrappedSseResponse));
         assertEquals("bad api key", client.extractErrorMessage(error));
         assertEquals("delta", AnthropicLlmProviderClient.extractStreamDelta(
                 "content_block_delta",
@@ -109,5 +114,6 @@ public class LlmProviderClientTest {
     public void anthropicDetectsEventStreamResponses() {
         assertTrue(AnthropicLlmProviderClient.isEventStream("text/event-stream", "{\"content\":[]}"));
         assertTrue(AnthropicLlmProviderClient.isEventStream("application/json", "data:{\"content\":[]}"));
+        assertEquals("event: message_start", AnthropicLlmProviderClient.normalizeEventStreamLine("data:event: message_start"));
     }
 }
