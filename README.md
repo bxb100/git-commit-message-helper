@@ -8,6 +8,12 @@ It combines a structured commit editor, customizable Conventional Commit style t
 
 This project started as an enhanced version of [git-commit-template](https://plugins.jetbrains.com/plugin/9861-git-commit-template) and has evolved into a more configurable commit authoring assistant.
 
+## JetBrains Marketplace
+
+[![Git Commit Message Helper](https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/operation.png)](https://plugins.jetbrains.com/plugin/13477-git-commit-message-helper)
+
+Install from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/13477-git-commit-message-helper).
+
 ## What It Does
 
 - Adds commit actions directly to the IntelliJ commit message panel.
@@ -54,7 +60,7 @@ Everything here is configurable, including the template text, visible fields, ty
 
 ## Installation
 
-Install from the JetBrains Marketplace inside your IDE:
+Install from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/13477-git-commit-message-helper) inside your IDE:
 
 `File` -> `Settings` -> `Plugins` -> `Marketplace` -> `Git Commit Message Helper`
 
