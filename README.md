@@ -100,6 +100,12 @@ You can edit the allowed commit types and their descriptions to match your team'
 
 ![settings-2.png](https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-2.png)
 
+### LLM Settings
+
+You can configure the LLM provider, endpoint, credentials, model, temperature, response language, and Smart Echo behavior from the dedicated settings page.
+
+![settings-3.png](https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-3.png)
+
 ## LLM Compatibility
 
 The plugin now supports two LLM provider modes:

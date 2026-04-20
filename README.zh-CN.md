@@ -100,6 +100,12 @@ Closes issue
 
 ![settings-2.png](https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-2.png)
 
+### LLM 设置
+
+你可以在专门的设置页中配置 LLM 的 Provider、接口地址、鉴权信息、模型、Temperature、返回语言以及 Smart Echo 等行为。
+
+![settings-3.png](https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-3.png)
+
 ## LLM 兼容性
 
 插件现在支持两种 Provider 模式：
