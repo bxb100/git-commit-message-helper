@@ -40,7 +40,12 @@ class AnthropicLlmProviderClient extends AbstractHttpLlmProviderClient {
         }
 
         try {
-            return extractChatResponse(readAll(inputStream));
+            String responseBody = readAll(inputStream);
+            String contentType = connection.getHeaderField("Content-Type");
+            if (isEventStream(contentType, responseBody)) {
+                return extractChatResponseFromEventStream(responseBody);
+            }
+            return extractChatResponse(responseBody);
         } finally {
             connection.disconnect();
         }
@@ -122,6 +127,31 @@ class AnthropicLlmProviderClient extends AbstractHttpLlmProviderClient {
     }
 
     @NotNull
+    static String extractChatResponseFromEventStream(@NotNull String responseBody) {
+        StringBuilder builder = new StringBuilder();
+        String currentEvent = "";
+        for (String rawLine : responseBody.split("\\R")) {
+            String line = rawLine.trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+            if (line.startsWith("event:")) {
+                currentEvent = line.substring(6).trim();
+                continue;
+            }
+            if (!line.startsWith("data:")) {
+                continue;
+            }
+            String payload = line.substring(5).trim();
+            if (payload.isEmpty() || "[DONE]".equals(payload)) {
+                continue;
+            }
+            builder.append(extractStreamDelta(currentEvent, payload));
+        }
+        return builder.toString();
+    }
+
+    @NotNull
     static String extractStreamDelta(@NotNull String eventType, @NotNull String payload) {
         JsonObject jsonObject = JsonParser.parseString(payload).getAsJsonObject();
         if ("content_block_delta".equals(eventType)
@@ -176,5 +206,10 @@ class AnthropicLlmProviderClient extends AbstractHttpLlmProviderClient {
             return baseUrl + "/messages";
         }
         return new AnthropicLlmProviderClient().resolveEndpoint(profile, "/v1/messages");
+    }
+
+    static boolean isEventStream(String contentType, @NotNull String responseBody) {
+        return contentType != null && contentType.contains("text/event-stream")
+                || responseBody.startsWith("data:");
     }
 }

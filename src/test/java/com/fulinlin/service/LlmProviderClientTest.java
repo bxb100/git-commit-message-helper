@@ -55,10 +55,12 @@ public class LlmProviderClientTest {
     @Test
     public void anthropicResponseParsingExtractsTextAndError() {
         String response = "{\"content\":[{\"type\":\"text\",\"text\":\"hello\"},{\"type\":\"text\",\"text\":\" world\"}]}";
+        String sseResponse = "data:{\"content\":[{\"type\":\"text\",\"text\":\"hello world\"}]}\n\n";
         String error = "{\"error\":{\"type\":\"invalid_request_error\",\"message\":\"bad api key\"}}";
         AnthropicLlmProviderClient client = new AnthropicLlmProviderClient();
 
         assertEquals("hello world", AnthropicLlmProviderClient.extractChatResponse(response));
+        assertEquals("hello world", AnthropicLlmProviderClient.extractChatResponseFromEventStream(sseResponse));
         assertEquals("bad api key", client.extractErrorMessage(error));
         assertEquals("delta", AnthropicLlmProviderClient.extractStreamDelta(
                 "content_block_delta",
@@ -101,5 +103,11 @@ public class LlmProviderClientTest {
 
         profile.setBaseUrl("https://api.anthropic.com/v1/messages");
         assertEquals("https://api.anthropic.com/v1/messages", AnthropicLlmProviderClient.resolveMessagesEndpoint(profile));
+    }
+
+    @Test
+    public void anthropicDetectsEventStreamResponses() {
+        assertTrue(AnthropicLlmProviderClient.isEventStream("text/event-stream", "{\"content\":[]}"));
+        assertTrue(AnthropicLlmProviderClient.isEventStream("application/json", "data:{\"content\":[]}"));
     }
 }
