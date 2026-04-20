@@ -4,7 +4,7 @@
 
 Git Commit Message Helper is an IntelliJ Platform plugin for writing cleaner, more consistent commit messages without leaving the IDE.
 
-It combines a structured commit editor, customizable Conventional Commit style templates, and OpenAI-compatible LLM assistance into one workflow. You can create commit messages manually, generate them from selected changes, reformat existing drafts, and tune the final output to match your team's conventions.
+It combines a structured commit editor, customizable Conventional Commit style templates, and provider-aware LLM assistance into one workflow. You can create commit messages manually, generate them from selected changes, reformat existing drafts, and tune the final output to match your team's conventions.
 
 This project started as an enhanced version of [git-commit-template](https://plugins.jetbrains.com/plugin/9861-git-commit-template) and has evolved into a more configurable commit authoring assistant.
 
@@ -75,7 +75,7 @@ You can configure:
 - Type display mode and how many type options are shown inline
 - Which commit fields are hidden in the editor
 - Skip-CI presets and defaults
-- LLM base URL, API key, model, temperature, response language, and Smart Echo
+- LLM provider, base URL, API key, model, temperature, response language, and Smart Echo
 - Visibility of the three commit actions
 
 ### General Settings
@@ -96,7 +96,12 @@ You can edit the allowed commit types and their descriptions to match your team'
 
 ## LLM Compatibility
 
-The current AI integration uses an OpenAI-compatible Chat Completions API.
+The plugin now supports two LLM provider modes:
+
+- `OpenAI Compatible`
+- `Anthropic`
+
+### OpenAI Compatible
 
 Your configured `Base URL` can be either:
 
@@ -108,7 +113,19 @@ The request uses:
 - `Authorization: Bearer <API Key>`
 - JSON fields including `model`, `temperature`, `stream`, and `messages`
 
-This makes the plugin compatible with services that expose an OpenAI-style chat completions interface.
+This mode works with services that expose an OpenAI-style Chat Completions interface.
+
+### Anthropic
+
+For Anthropic, use a base URL such as `https://api.anthropic.com`. The plugin automatically calls `/v1/messages`.
+
+The request uses:
+
+- `x-api-key: <API Key>`
+- `anthropic-version: 2023-06-01`
+- JSON fields including `model`, `system`, `messages`, `temperature`, `max_tokens`, and `stream`
+
+This mode talks to Anthropic's native Messages API instead of relying on an OpenAI-compatible gateway.
 
 ### Smart Echo
 

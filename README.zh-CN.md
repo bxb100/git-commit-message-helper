@@ -4,7 +4,7 @@
 
 Git Commit Message Helper 是一个 IntelliJ Platform 插件，用来帮助你在 IDE 中更高效地编写规范、清晰且一致的 Git 提交信息。
 
-它把结构化提交编辑器、可自定义的 Conventional Commit 风格模板，以及兼容 OpenAI 接口的 LLM 能力整合在一起。你既可以手动编写提交信息，也可以根据所选变更自动生成、对已有草稿进行格式化，并根据团队规范输出最终结果。
+它把结构化提交编辑器、可自定义的 Conventional Commit 风格模板，以及支持多 Provider 的 LLM 能力整合在一起。你既可以手动编写提交信息，也可以根据所选变更自动生成、对已有草稿进行格式化，并根据团队规范输出最终结果。
 
 这个项目最初基于 [git-commit-template](https://plugins.jetbrains.com/plugin/9861-git-commit-template) 增强而来，当前已经演进为一个更完整、更灵活的提交信息辅助插件。
 
@@ -75,7 +75,7 @@ Closes issue
 - 类型展示模式，以及在界面中内联展示多少个类型
 - 哪些提交字段在编辑器中隐藏
 - Skip CI 预设项与默认值
-- LLM 的 Base URL、API Key、Model、Temperature、Response Language 和 Smart Echo
+- LLM 的 Provider、Base URL、API Key、Model、Temperature、Response Language 和 Smart Echo
 - 3 个提交动作的显示状态
 
 ### 通用设置
@@ -96,7 +96,12 @@ Closes issue
 
 ## LLM 兼容性
 
-当前 AI 集成使用的是兼容 OpenAI 的 Chat Completions API。
+插件现在支持两种 Provider 模式：
+
+- `OpenAI Compatible`
+- `Anthropic`
+
+### OpenAI Compatible
 
 配置中的 `Base URL` 可以是：
 
@@ -109,6 +114,18 @@ Closes issue
 - 包含 `model`、`temperature`、`stream`、`messages` 等字段的 JSON 请求体
 
 因此，只要服务提供的是 OpenAI 风格的 Chat Completions 接口，理论上都可以接入本插件。
+
+### Anthropic
+
+如果使用 Anthropic，`Base URL` 可以配置为 `https://api.anthropic.com`，插件会自动调用 `/v1/messages`。
+
+请求会使用：
+
+- `x-api-key: <API Key>`
+- `anthropic-version: 2023-06-01`
+- 包含 `model`、`system`、`messages`、`temperature`、`max_tokens`、`stream` 等字段的 JSON 请求体
+
+这种模式会直接调用 Anthropic 官方 Messages API，而不是通过 OpenAI 兼容网关转接。
 
 ### Smart Echo
 

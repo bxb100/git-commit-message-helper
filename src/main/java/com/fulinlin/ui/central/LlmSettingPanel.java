@@ -3,6 +3,7 @@ package com.fulinlin.ui.central;
 import com.fulinlin.localization.PluginBundle;
 import com.fulinlin.model.LlmProfile;
 import com.fulinlin.model.LlmSettings;
+import com.fulinlin.model.enums.LlmProvider;
 import com.fulinlin.service.LlmClient;
 import com.fulinlin.storage.GitCommitMessageHelperSettings;
 import com.intellij.icons.AllIcons;
@@ -109,36 +110,56 @@ public class LlmSettingPanel {
         gbc.gridy = 1;
         gbc.weightx = 0;
         gbc.fill = GridBagConstraints.NONE;
-        panel.add(new JLabel(PluginBundle.get("setting.central.llm.temperature")), gbc);
+        JPanel compactSettingsPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints compactGbc = new GridBagConstraints();
+        compactGbc.insets = JBUI.insets(0, 0, 0, 8);
+        compactGbc.gridx = 0;
+        compactGbc.gridy = 0;
+        compactGbc.anchor = GridBagConstraints.WEST;
+        compactSettingsPanel.add(new JLabel(PluginBundle.get("setting.central.llm.temperature")), compactGbc);
 
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.weightx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(temperatureSpinner, gbc);
+        compactGbc.gridx = 1;
+        compactGbc.weightx = 0;
+        compactGbc.fill = GridBagConstraints.HORIZONTAL;
+        JComponent temperatureEditor = temperatureSpinner.getEditor();
+        temperatureEditor.setPreferredSize(new Dimension(JBUI.scale(110), temperatureEditor.getPreferredSize().height));
+        compactSettingsPanel.add(temperatureSpinner, compactGbc);
+
+        compactGbc.gridx = 2;
+        compactGbc.weightx = 0;
+        compactGbc.insets = JBUI.insets(0, 16, 0, 8);
+        compactSettingsPanel.add(new JLabel(PluginBundle.get("setting.central.llm.response.language")), compactGbc);
+
+        compactGbc.gridx = 3;
+        compactGbc.weightx = 1;
+        compactGbc.insets = JBUI.insets(0);
+        compactGbc.fill = GridBagConstraints.HORIZONTAL;
+        responseLanguageField.setPreferredSize(new Dimension(JBUI.scale(220), responseLanguageField.getPreferredSize().height));
+        compactSettingsPanel.add(responseLanguageField, compactGbc);
+
+        JPanel settingsRowWrapper = new JPanel(new BorderLayout());
+        settingsRowWrapper.add(compactSettingsPanel, BorderLayout.WEST);
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        panel.add(new JLabel(PluginBundle.get("setting.central.llm.response.language")), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(responseLanguageField, gbc);
+        panel.add(settingsRowWrapper, gbc);
 
         JPanel checkboxPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(12), 0));
         checkboxPanel.add(smartEchoEnabledCheckBox);
         checkboxPanel.add(streamingResponseEnabledCheckBox);
         checkboxPanel.add(testButton);
         checkboxPanel.add(testStatusLabel);
-        gbc.gridx = 1;
-        gbc.gridy = 3;
+        JPanel checkboxWrapper = new JPanel(new BorderLayout());
+        checkboxWrapper.add(checkboxPanel, BorderLayout.WEST);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(checkboxPanel, gbc);
+        panel.add(checkboxWrapper, gbc);
         return panel;
     }
 
@@ -331,6 +352,7 @@ public class LlmSettingPanel {
         profile.setBaseUrl(source.getBaseUrl());
         profile.setApiKey(source.getApiKey());
         profile.setModel(source.getModel());
+        profile.setProvider(source.getProvider());
         return profile;
     }
 
@@ -361,7 +383,8 @@ public class LlmSettingPanel {
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             Object displayValue = value;
             if (value instanceof LlmProfile) {
-                displayValue = ((LlmProfile) value).getName();
+                LlmProfile profile = (LlmProfile) value;
+                displayValue = profile.getName() + " (" + LlmProvider.fromNullable(profile.getProvider()).getDisplayName() + ")";
             }
             return super.getListCellRendererComponent(list, displayValue, index, isSelected, cellHasFocus);
         }
@@ -369,8 +392,9 @@ public class LlmSettingPanel {
 
     private static class LlmProfileTable extends JBTable {
         private static final int NAME_COLUMN = 0;
-        private static final int BASE_URL_COLUMN = 1;
-        private static final int MODEL_COLUMN = 2;
+        private static final int PROVIDER_COLUMN = 1;
+        private static final int BASE_URL_COLUMN = 2;
+        private static final int MODEL_COLUMN = 3;
 
         private final LlmProfileTableModel tableModel = new LlmProfileTableModel();
 
@@ -378,6 +402,7 @@ public class LlmSettingPanel {
             setModel(tableModel);
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             setColumnWidth(NAME_COLUMN, 160);
+            setColumnWidth(PROVIDER_COLUMN, 150);
             setColumnWidth(BASE_URL_COLUMN, 260);
             setColumnWidth(MODEL_COLUMN, 180);
         }
@@ -486,7 +511,7 @@ public class LlmSettingPanel {
 
         @Override
         public int getColumnCount() {
-            return 3;
+            return 4;
         }
 
         @Override
@@ -494,6 +519,8 @@ public class LlmSettingPanel {
             switch (column) {
                 case LlmProfileTable.NAME_COLUMN:
                     return PluginBundle.get("setting.llm.profile.name.column");
+                case LlmProfileTable.PROVIDER_COLUMN:
+                    return PluginBundle.get("setting.llm.profile.provider");
                 case LlmProfileTable.BASE_URL_COLUMN:
                     return PluginBundle.get("setting.central.llm.base.url");
                 case LlmProfileTable.MODEL_COLUMN:
@@ -514,6 +541,8 @@ public class LlmSettingPanel {
             switch (columnIndex) {
                 case LlmProfileTable.NAME_COLUMN:
                     return profile.getName();
+                case LlmProfileTable.PROVIDER_COLUMN:
+                    return LlmProvider.fromNullable(profile.getProvider()).getDisplayName();
                 case LlmProfileTable.BASE_URL_COLUMN:
                     return profile.getBaseUrl();
                 case LlmProfileTable.MODEL_COLUMN:

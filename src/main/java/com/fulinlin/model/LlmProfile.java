@@ -1,5 +1,7 @@
 package com.fulinlin.model;
 
+import com.fulinlin.model.enums.LlmProvider;
+
 import java.util.Objects;
 
 public class LlmProfile {
@@ -13,6 +15,8 @@ public class LlmProfile {
     private String apiKey;
 
     private String model;
+
+    private LlmProvider provider;
 
     public String getId() {
         return id;
@@ -54,6 +58,14 @@ public class LlmProfile {
         this.model = model;
     }
 
+    public LlmProvider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(LlmProvider provider) {
+        this.provider = provider;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,11 +75,12 @@ public class LlmProfile {
                 && Objects.equals(name, that.name)
                 && Objects.equals(baseUrl, that.baseUrl)
                 && Objects.equals(apiKey, that.apiKey)
-                && Objects.equals(model, that.model);
+                && Objects.equals(model, that.model)
+                && provider == that.provider;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, baseUrl, apiKey, model);
+        return Objects.hash(id, name, baseUrl, apiKey, model, provider);
     }
 }

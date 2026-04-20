@@ -1,0 +1,105 @@
+package com.fulinlin.service;
+
+import com.fulinlin.model.LlmProfile;
+import com.fulinlin.model.LlmSettings;
+import com.fulinlin.model.enums.LlmProvider;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class LlmProviderClientTest {
+
+    @Test
+    public void openAiRequestBodyUsesChatCompletionsShape() {
+        LlmProfile profile = new LlmProfile();
+        profile.setModel("gpt-4.1");
+        LlmSettings settings = new LlmSettings();
+        settings.setTemperature(0.6D);
+
+        JsonObject requestBody = OpenAiCompatibleLlmProviderClient.createRequestBody(
+                profile, settings, "system prompt", "user prompt", true
+        );
+
+        assertEquals("gpt-4.1", requestBody.get("model").getAsString());
+        assertTrue(requestBody.get("stream").getAsBoolean());
+        assertEquals(0.6D, requestBody.get("temperature").getAsDouble(), 0.0D);
+        JsonArray messages = requestBody.getAsJsonArray("messages");
+        assertEquals(2, messages.size());
+        assertEquals("system", messages.get(0).getAsJsonObject().get("role").getAsString());
+        assertEquals("user", messages.get(1).getAsJsonObject().get("role").getAsString());
+    }
+
+    @Test
+    public void anthropicRequestBodyUsesMessagesApiShape() {
+        LlmProfile profile = new LlmProfile();
+        profile.setModel("claude-3-7-sonnet-latest");
+        LlmSettings settings = new LlmSettings();
+        settings.setTemperature(0.3D);
+
+        JsonObject requestBody = AnthropicLlmProviderClient.createRequestBody(
+                profile, settings, "system prompt", "user prompt", false
+        );
+
+        assertEquals("claude-3-7-sonnet-latest", requestBody.get("model").getAsString());
+        assertEquals("system prompt", requestBody.get("system").getAsString());
+        assertEquals(1024, requestBody.get("max_tokens").getAsInt());
+        JsonArray messages = requestBody.getAsJsonArray("messages");
+        assertEquals(1, messages.size());
+        assertEquals("user", messages.get(0).getAsJsonObject().get("role").getAsString());
+        assertEquals("user prompt", messages.get(0).getAsJsonObject().get("content").getAsString());
+    }
+
+    @Test
+    public void anthropicResponseParsingExtractsTextAndError() {
+        String response = "{\"content\":[{\"type\":\"text\",\"text\":\"hello\"},{\"type\":\"text\",\"text\":\" world\"}]}";
+        String error = "{\"error\":{\"type\":\"invalid_request_error\",\"message\":\"bad api key\"}}";
+        AnthropicLlmProviderClient client = new AnthropicLlmProviderClient();
+
+        assertEquals("hello world", AnthropicLlmProviderClient.extractChatResponse(response));
+        assertEquals("bad api key", client.extractErrorMessage(error));
+        assertEquals("delta", AnthropicLlmProviderClient.extractStreamDelta(
+                "content_block_delta",
+                "{\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\"delta\"}}"
+        ));
+    }
+
+    @Test
+    public void openAiResponseParsingExtractsMessageAndStreamText() {
+        String response = "{\"choices\":[{\"message\":{\"content\":\"commit text\"}}]}";
+        String stream = "{\"choices\":[{\"delta\":{\"content\":\"part\"}}]}";
+
+        assertEquals("commit text", OpenAiCompatibleLlmProviderClient.extractChatResponse(response));
+        assertEquals("part", OpenAiCompatibleLlmProviderClient.extractStreamDelta(stream));
+    }
+
+    @Test
+    public void defaultProfileAndLegacyProfilesUseOpenAiProvider() {
+        LlmProfile profile = new LlmProfile();
+        profile.setId("legacy");
+        profile.setName("Legacy");
+        profile.setBaseUrl(null);
+        profile.setApiKey("");
+        profile.setModel("");
+
+        com.fulinlin.storage.GitCommitMessageHelperSettings.checkDefaultLlmProfile(profile);
+
+        assertEquals(LlmProvider.OPENAI_COMPATIBLE, profile.getProvider());
+        assertEquals("https://api.openai.com/v1", profile.getBaseUrl());
+    }
+
+    @Test
+    public void anthropicEndpointAcceptsBaseUrlWithOrWithoutV1() {
+        LlmProfile profile = new LlmProfile();
+        profile.setBaseUrl("https://api.anthropic.com");
+        assertEquals("https://api.anthropic.com/v1/messages", AnthropicLlmProviderClient.resolveMessagesEndpoint(profile));
+
+        profile.setBaseUrl("https://api.anthropic.com/v1");
+        assertEquals("https://api.anthropic.com/v1/messages", AnthropicLlmProviderClient.resolveMessagesEndpoint(profile));
+
+        profile.setBaseUrl("https://api.anthropic.com/v1/messages");
+        assertEquals("https://api.anthropic.com/v1/messages", AnthropicLlmProviderClient.resolveMessagesEndpoint(profile));
+    }
+}

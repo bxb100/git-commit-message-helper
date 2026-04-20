@@ -2,6 +2,7 @@ package com.fulinlin.ui.central;
 
 import com.fulinlin.localization.PluginBundle;
 import com.fulinlin.model.LlmProfile;
+import com.fulinlin.model.enums.LlmProvider;
 import com.fulinlin.storage.GitCommitMessageHelperSettings;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.util.ui.JBUI;
@@ -18,7 +19,9 @@ public class LlmProfileEditor extends DialogWrapper {
     private final JTextField baseUrlField;
     private final JPasswordField apiKeyField;
     private final JTextField modelField;
+    private final JComboBox<LlmProvider> providerComboBox;
     private final String profileId;
+    private LlmProvider previousProvider;
 
     public LlmProfileEditor(@NotNull String title, @NotNull LlmProfile profile) {
         super(true);
@@ -29,7 +32,18 @@ public class LlmProfileEditor extends DialogWrapper {
         baseUrlField = new JTextField(profile.getBaseUrl());
         apiKeyField = new JPasswordField(profile.getApiKey());
         modelField = new JTextField(profile.getModel());
+        providerComboBox = new JComboBox<>(LlmProvider.values());
+        providerComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Object displayValue = value instanceof LlmProvider ? ((LlmProvider) value).getDisplayName() : value;
+                return super.getListCellRendererComponent(list, displayValue, index, isSelected, cellHasFocus);
+            }
+        });
+        previousProvider = LlmProvider.fromNullable(profile.getProvider());
+        providerComboBox.setSelectedItem(previousProvider);
         buildPanel();
+        bindListeners();
         init();
     }
 
@@ -41,6 +55,7 @@ public class LlmProfileEditor extends DialogWrapper {
         profile.setBaseUrl(baseUrlField.getText().trim());
         profile.setApiKey(new String(apiKeyField.getPassword()).trim());
         profile.setModel(modelField.getText().trim());
+        profile.setProvider((LlmProvider) providerComboBox.getSelectedItem());
         GitCommitMessageHelperSettings.checkDefaultLlmProfile(profile);
         return profile;
     }
@@ -60,6 +75,7 @@ public class LlmProfileEditor extends DialogWrapper {
 
         int row = 0;
         row = addField(PluginBundle.get("setting.llm.profile.name"), nameField, gbc, row);
+        row = addField(PluginBundle.get("setting.llm.profile.provider"), providerComboBox, gbc, row);
         row = addField(PluginBundle.get("setting.central.llm.base.url"), baseUrlField, gbc, row);
         row = addField(PluginBundle.get("setting.central.llm.api.key"), apiKeyField, gbc, row);
         addField(PluginBundle.get("setting.central.llm.model"), modelField, gbc, row);
@@ -77,5 +93,19 @@ public class LlmProfileEditor extends DialogWrapper {
         component.setPreferredSize(new Dimension(JBUI.scale(420), component.getPreferredSize().height));
         mainPanel.add(component, gbc);
         return row + 1;
+    }
+
+    private void bindListeners() {
+        providerComboBox.addActionListener(e -> {
+            LlmProvider currentProvider = (LlmProvider) providerComboBox.getSelectedItem();
+            if (currentProvider == null) {
+                return;
+            }
+            String currentBaseUrl = baseUrlField.getText().trim();
+            if (currentBaseUrl.isEmpty() || currentBaseUrl.equals(previousProvider.getDefaultBaseUrl())) {
+                baseUrlField.setText(currentProvider.getDefaultBaseUrl());
+            }
+            previousProvider = currentProvider;
+        });
     }
 }

@@ -8,6 +8,7 @@ import com.fulinlin.model.DataSettings;
 import com.fulinlin.model.LlmProfile;
 import com.fulinlin.model.LlmSettings;
 import com.fulinlin.model.TypeAlias;
+import com.fulinlin.model.enums.LlmProvider;
 import com.fulinlin.model.enums.TypeDisplayStyleEnum;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -262,7 +263,8 @@ public class GitCommitMessageHelperSettings implements PersistentStateComponent<
         LlmProfile profile = new LlmProfile();
         profile.setId("default");
         profile.setName("Default");
-        profile.setBaseUrl("https://api.openai.com/v1");
+        profile.setProvider(LlmProvider.defaultProvider());
+        profile.setBaseUrl(profile.getProvider().getDefaultBaseUrl());
         profile.setApiKey("");
         profile.setModel("");
         return profile;
@@ -311,8 +313,9 @@ public class GitCommitMessageHelperSettings implements PersistentStateComponent<
         if (profile.getName() == null || profile.getName().trim().isEmpty()) {
             profile.setName("Default");
         }
+        profile.setProvider(LlmProvider.fromNullable(profile.getProvider()));
         if (profile.getBaseUrl() == null) {
-            profile.setBaseUrl("https://api.openai.com/v1");
+            profile.setBaseUrl(profile.getProvider().getDefaultBaseUrl());
         }
         if (profile.getApiKey() == null) {
             profile.setApiKey("");
