@@ -1,45 +1,161 @@
 <div>
-    <h2>Introduction</h2>
-    <br>
-    <ul>
-        <li>A plugin that helps you standardize submissions.</li>
-        <li>This plugin is an upgraded version of the source idea plugin git-commit-template,adding a series of
-            personalized configurations.
-        </li>
-    </ul>
-    <ul>
-        <li>一个可帮助您标准化提交内容的插件</li>
-        <li>该插件是源自git-commit-template的加强版,添加一系列个性化的配置</li>
-    </ul>
-</div>
-<div>
-    <h2>How to use</h2>
-    <br>
-    <p align="center"><img src="https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/operation.gif"
-            alt="operation" style="width: auto;height: auto;max-width: 90%; max-height: 90%;">
+    <p>
+        <strong>Git Commit Message Helper</strong> helps you write cleaner, more consistent commit messages without
+        leaving the IDE.
+    </p>
+    <p>
+        <strong>Git Commit Message Helper</strong> 帮助你在 IDE 内更高效地编写清晰、统一、规范的提交信息。
+    </p>
+    <p>
+        It combines a structured commit editor, customizable Conventional Commit style templates, and LLM-assisted
+        workflows in one IntelliJ plugin. You can draft commit messages manually, generate them from selected changes,
+        reformat existing text, and adapt the output to your team's rules.
+    </p>
+    <p>
+        它将结构化提交编辑器、可自定义的 Conventional Commit 风格模板，以及 LLM 辅助工作流整合到同一个
+        IntelliJ 插件中。你既可以手动编写提交信息，也可以根据所选变更生成草稿、重写已有内容，并按团队规范输出最终结果。
     </p>
 </div>
-<br>
+
+<div>
+    <h2>Why Use It</h2>
+    <ul>
+        <li>Keep commit messages consistent with customizable templates and type rules.</li>
+        <li>Write commits faster with built-in actions directly in the VCS commit message area.</li>
+        <li>Generate commit messages from the selected diff with an LLM.</li>
+        <li>Reformat an existing draft to match your configured structure.</li>
+        <li>Parse an existing message back into structured fields with Smart Echo.</li>
+        <li>Control field visibility, skip-CI presets, and action visibility from settings.</li>
+    </ul>
+    <ul>
+        <li>通过可配置模板和提交类型规则，让提交信息更统一。</li>
+        <li>在 VCS 提交面板中直接使用内置动作，更快完成提交信息编写。</li>
+        <li>支持基于当前选中 diff 通过 LLM 生成提交信息。</li>
+        <li>支持把已有草稿按当前模板重新整理。</li>
+        <li>支持通过 Smart Echo 将现有提交信息回填为结构化字段。</li>
+        <li>可在设置中控制字段显示、Skip CI 预设和动作可见性。</li>
+    </ul>
+</div>
+
+<div>
+    <h2>Main Actions</h2>
+    <ul>
+        <li><strong>Generate Commit Message</strong>: create a draft from the currently selected git changes.</li>
+        <li><strong>Format Commit Message</strong>: rewrite the current commit message using your configured template.</li>
+        <li><strong>Create Commit Message</strong>: open a structured editor for manual commit composition.</li>
+    </ul>
+    <ul>
+        <li><strong>Generate Commit Message</strong>：根据当前选中的 Git 变更生成提交信息草稿。</li>
+        <li><strong>Format Commit Message</strong>：按照你配置的模板重写当前提交信息。</li>
+        <li><strong>Create Commit Message</strong>：打开结构化编辑器，手动编写提交信息。</li>
+    </ul>
+    <p align="center">
+        <img src="https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/operation.gif"
+             alt="Git Commit Message Helper workflow"
+             style="width: auto; height: auto; max-width: 90%; max-height: 90%;">
+    </p>
+</div>
+
+<div>
+    <h2>Default Commit Style</h2>
+    <p>The plugin is ready to use out of the box with a Conventional Commit style template such as:</p>
+    <p>插件开箱即用，默认提供类似 Conventional Commits 的提交模板，例如：</p>
+    <pre><code>type(scope): subject
+
+body
+
+BREAKING CHANGE: changes
+
+Closes issue
+
+[skip ci]</code></pre>
+    <p>
+        The template, visible fields, type aliases, type descriptions, and skip-CI behavior are all configurable.
+    </p>
+    <p>
+        模板内容、字段显示、类型别名、类型说明以及 Skip CI 行为都可以按团队需要调整。
+    </p>
+</div>
+
 <div>
     <h2>Configuration</h2>
-    <p align="center">If you want to personalize the window, you can go to the settings menu to set it up: </p>
-    <p align="center"> Configuration path: File -> settings->Other Settings-> CitCommitMessageHelper </p>
-
-    <p align="center"><img src="https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-0.png"
-                           alt="settings-0" style="width: auto;height: auto;max-width: 90%; max-height: 90%;">
-
-    <p align="center">If you want to personalize your submission template.You can open the following location: </p>
-    <p align="center"> Configuration path: File -> settings->Other Settings-> CitCommitMessageHelper-> Commit Template-> Template </p>
-
-    <p align="center"><img src="https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-1.png"
-            alt="settings-1" style="width: auto;height: auto;max-width: 90%; max-height: 90%;">
+    <p>
+        Open <strong>File | Settings | GitCommitMessageHelper</strong> to configure the plugin. The settings are split
+        into focused pages so you can tune both the authoring workflow and the LLM integration.
+    </p>
+    <p>
+        打开 <strong>File | Settings | GitCommitMessageHelper</strong> 即可配置插件。设置项按照不同功能拆分，便于分别调整提交编写流程和
+        LLM 集成能力。
     </p>
 
-    <p align="center">If you want to change the type of submission.You can open the following location: </p>
-    <p align="center"> Configuration path: File -> settings->Other Settings-> CitCommitMessageHelper-> Commit Template-> Type</p>
+    <h3>General Settings</h3>
+    <p>
+        Choose how commit types are displayed, how many appear inline, which fields are hidden, whether skip-CI
+        options are enabled, and which actions should be visible in the commit panel.
+    </p>
+    <p>
+        你可以设置提交类型的展示方式、内联显示数量、隐藏哪些字段、是否启用 Skip CI 选项，以及在提交面板中显示哪些动作。
+    </p>
+    <p align="center">
+        <img src="https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-0.png"
+             alt="General settings"
+             style="width: auto; height: auto; max-width: 90%; max-height: 90%;">
+    </p>
 
+    <h3>Commit Template</h3>
+    <p>
+        Customize the final commit message with an Apache Velocity template so the generated output matches your
+        team's exact format.
+    </p>
+    <p>
+        你可以通过 Apache Velocity 模板自定义最终提交信息的渲染格式，让输出结果严格符合团队规范。
+    </p>
+    <p align="center">
+        <img src="https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-1.png"
+             alt="Commit template settings"
+             style="width: auto; height: auto; max-width: 90%; max-height: 90%;">
+    </p>
+
+    <h3>Commit Types</h3>
+    <p>
+        Edit the allowed commit types and their descriptions to align with your workflow, terminology, and review
+        conventions.
+    </p>
+    <p>
+        你可以自由维护允许使用的提交类型及其描述，使之与团队术语、工作流和评审习惯保持一致。
+    </p>
     <p align="center">
         <img src="https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-2.png"
-             alt="settings-2" style="width: auto;height: auto;max-width: 90%; max-height: 90%;">
+             alt="Commit type settings"
+             style="width: auto; height: auto; max-width: 90%; max-height: 90%;">
+    </p>
+
+    <h3>LLM Settings</h3>
+    <p>
+        Configure the provider, base URL, API key, model, temperature, response language, and Smart Echo behavior.
+        The plugin currently supports both OpenAI-compatible endpoints and Anthropic.
+    </p>
+    <p>
+        你可以配置 Provider、Base URL、API Key、模型、Temperature、返回语言以及 Smart Echo 行为。目前插件支持
+        OpenAI Compatible 和 Anthropic 两种接入方式。
+    </p>
+    <p align="center">
+        <img src="https://raw.githubusercontent.com/AutismSuperman/git-commit-message-helper/master/doc/image/settings-3.png"
+             alt="LLM settings"
+             style="width: auto; height: auto; max-width: 90%; max-height: 90%;">
+    </p>
+</div>
+
+<div>
+    <h2>Project Background</h2>
+    <p>
+        This project started as an enhanced version of
+        <a href="https://plugins.jetbrains.com/plugin/9861-git-commit-template">git-commit-template</a> and has grown
+        into a more configurable commit authoring assistant for IntelliJ-based IDEs.
+    </p>
+    <p>
+        这个项目最初基于
+        <a href="https://plugins.jetbrains.com/plugin/9861-git-commit-template">git-commit-template</a>
+        增强而来，当前已经演进为一个面向 IntelliJ 平台、可配置能力更完整的提交信息辅助插件。
     </p>
 </div>
